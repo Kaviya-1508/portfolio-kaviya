@@ -28,7 +28,7 @@ export const PROJECTS: Project[] = [
     description:
       "Role-based event management system for students and faculty. CRUD operations for event creation, update, listing, and deletion. Responsive React frontend integrated with three Spring Boot microservices and a MongoDB backend.",
     tech: ["React", "TypeScript", "Tailwind CSS", "Spring Boot", "MongoDB", "Microservices"],
-    github: "https://github.com/Kaviya-1508/EventHub",
+    github: "https://github.com/Kaviya-1508/IP_mini_project",
     live: "https://ip-mini-project-xi.vercel.app",
     featured: true,
   },
