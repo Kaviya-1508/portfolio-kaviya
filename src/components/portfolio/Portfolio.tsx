@@ -576,7 +576,7 @@ function Hero() {
             (e.currentTarget as HTMLElement).style.boxShadow = "0 0 30px rgba(0,245,255,0.4)";
           }}>[ View My Projects ]</MagButton>
 
-          <MagButton href="https://drive.google.com/file/d/1w69oTYtaqaZGofMS8VmmQpt6Ou6CBORS/view?usp=sharing"
+          <MagButton href="https://drive.google.com/file/d/1CKaCLH46O9YWX6qK4zcttmZKdIbW21fW/view?usp=drivesdk"
             target="_blank" style={{
               border: "1px solid rgba(255,255,255,0.2)",
               background: "rgba(255,255,255,0.04)", color: "#e2e8f0",
@@ -1063,7 +1063,7 @@ function ProjectCard({ project }: { project: typeof PROJECTS[number] }) {
 /* ====================================================================== */
 /* RESUME                                                                  */
 /* ====================================================================== */
-const RESUME_URL = "https://drive.google.com/file/d/1w69oTYtaqaZGofMS8VmmQpt6Ou6CBORS/view?usp=sharing";
+const RESUME_URL = "https://drive.google.com/file/d/1CKaCLH46O9YWX6qK4zcttmZKdIbW21fW/view?usp=drivesdk";
 function Resume() {
   const ref = useReveal<HTMLDivElement>();
   return (
