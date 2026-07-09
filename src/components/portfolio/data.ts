@@ -18,7 +18,7 @@ export const PROJECTS: Project[] = [
       "OSINT platform for investigating usernames, domains, and IP addresses across multiple public sources, with a correlation engine that maps relationships between discovered entities to visualize connections at a glance.",
     tech: ["JavaScript", "OSINT", "Node.js"],
     github: "https://github.com/Kaviya-1508/ShadowTrace",
-    live: "https://shadowtrace.vercel.app",
+    live: "https://shadow-trace-nexus.vercel.app",
     featured: true,
   },
   {
