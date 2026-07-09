@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as RM } from "react";
 import { PROJECTS, SKILLS, ACHIEVEMENTS, type SkillCategory } from "./data";
 import { addRipple, useReveal } from "./hooks";
+import { useIsMobile } from "../../hooks/use-mobile";
 
 /* ====================================================================== */
 /* CURSOR                                                                  */
@@ -957,6 +958,7 @@ function Projects() {
   const [f, setF] = useState<typeof FILTERS[number]>("All");
   const filtered = PROJECTS.filter((p) => f === "All" || p.category === f);
   const ref = useReveal<HTMLDivElement>();
+  const isMobile = useIsMobile();
   return (
     <section id="projects" style={{ padding: "120px 24px", maxWidth: 1280, margin: "0 auto" }}>
       <div ref={ref} className="reveal">
@@ -970,46 +972,125 @@ function Projects() {
               background: f === x ? "rgba(0,255,136,0.08)" : "transparent",
               color: f === x ? "#00ff88" : "#8892a4",
               boxShadow: f === x ? "0 0 20px rgba(0,255,136,0.2)" : "none",
-              transition: "all 0.2s",
+              transition: "all 0.25s cubic-bezier(0.2,0.8,0.2,1)",
+              transform: f === x ? "scale(1.05)" : "scale(1)",
             }}>{x}</button>
           ))}
         </div>
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20,
-        }}>
-          {filtered.map((p) => <ProjectCard key={p.name} project={p} />)}
-        </div>
+        {isMobile ? (
+          <MobileProjectCarousel key={f} projects={filtered} />
+        ) : (
+          <div key={f} className="filter-swap" style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20,
+          }}>
+            {filtered.map((p, i) => <ProjectCard key={p.name} project={p} index={i} />)}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-function ProjectCard({ project }: { project: typeof PROJECTS[number] }) {
+function MobileProjectCarousel({ projects }: { projects: typeof PROJECTS[number][] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [showHint, setShowHint] = useState(true);
+
+  const cardStep = () => {
+    const el = trackRef.current;
+    if (!el) return 1;
+    const first = el.firstElementChild as HTMLElement | null;
+    const gap = 14;
+    return (first?.offsetWidth ?? el.clientWidth * 0.86) + gap;
+  };
+
+  const onScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    if (showHint) setShowHint(false);
+    const idx = Math.round(el.scrollLeft / cardStep());
+    setActive(Math.max(0, Math.min(idx, projects.length - 1)));
+  };
+
+  const scrollToIndex = (i: number) => {
+    trackRef.current?.scrollTo({ left: i * cardStep(), behavior: "smooth" });
+  };
+
+  if (projects.length === 0) return null;
+
+  return (
+    <div style={{ position: "relative" }}>
+      <div
+        ref={trackRef}
+        onScroll={onScroll}
+        className="filter-swap"
+        style={{
+          display: "flex", gap: 14, overflowX: "auto", scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch", paddingBottom: 4, marginBottom: 4,
+        }}
+      >
+        {projects.map((p, i) => (
+          <div key={p.name} style={{ flex: "0 0 86%", scrollSnapAlign: "center" }}>
+            <ProjectCard project={p} index={i} />
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 18 }}>
+        {projects.map((_, i) => (
+          <button key={i} onClick={() => scrollToIndex(i)} aria-label={`Go to project ${i + 1}`} style={{
+            width: i === active ? 22 : 7, height: 7, borderRadius: 999, border: "none", padding: 0,
+            cursor: "pointer", background: i === active ? "#00ff88" : "rgba(255,255,255,0.18)",
+            boxShadow: i === active ? "0 0 12px rgba(0,255,136,0.6)" : "none",
+            transition: "all 0.35s cubic-bezier(0.2,0.8,0.2,1)",
+          }} />
+        ))}
+      </div>
+
+      {showHint && projects.length > 1 && (
+        <div className="font-code swipe-hint" style={{
+          position: "absolute", top: -30, right: 4, fontSize: 10, letterSpacing: "0.08em",
+          color: "#00f5ff", display: "inline-flex", alignItems: "center", gap: 5,
+          textTransform: "uppercase", pointerEvents: "none",
+        }}>
+          swipe <span style={{ fontSize: 13 }}>→</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectCard({ project, index = 0 }: { project: typeof PROJECTS[number]; index?: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const revealRef = useReveal<HTMLDivElement>(0.1);
   const tilt = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current; if (!el) return;
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width - 0.5;
     const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = `perspective(1000px) rotateY(${px * 6}deg) rotateX(${-py * 6}deg)`;
+    el.style.transform = `perspective(1000px) rotateY(${px * 6}deg) rotateX(${-py * 6}deg) translateY(-4px)`;
   };
   const leave = () => { if (ref.current) ref.current.style.transform = ""; };
   const catColor = project.category === "Security" ? "#ff2d55" : project.category === "Game" ? "#7c3aed" : "#00f5ff";
   const catIcon = project.category === "Security" ? "🔐" : project.category === "Game" ? "🎮" : "🌐";
+  const setRefs = (el: HTMLDivElement | null) => {
+    ref.current = el;
+    revealRef.current = el;
+  };
   return (
-    <div ref={ref} className="glass" onMouseMove={tilt} onMouseLeave={leave}
+    <div ref={setRefs} className="glass project-card-reveal" onMouseMove={tilt} onMouseLeave={leave}
       style={{
         padding: 20, gridColumn: project.featured ? "span 2" : undefined,
         display: "flex", flexDirection: "column", gap: 12, position: "relative",
-        transition: "transform 0.6s cubic-bezier(0.2,0.8,0.2,1), border-color 0.3s, box-shadow 0.3s",
-        transformStyle: "preserve-3d",
+        transition: "transform 0.5s cubic-bezier(0.2,0.8,0.2,1), border-color 0.3s, box-shadow 0.3s",
+        transformStyle: "preserve-3d", animationDelay: `${Math.min(index, 6) * 90}ms`,
       }}>
       {project.featured && (
-        <span className="font-code" style={{
+        <span className="font-code badge-shimmer" style={{
           position: "absolute", top: 0, right: 0, padding: "3px 8px",
           background: "linear-gradient(135deg,#ffd60a,#ff9500)", color: "black",
           fontSize: 9, fontWeight: 700, letterSpacing: "0.1em",
-          borderRadius: "0 16px 0 8px",
+          borderRadius: "0 16px 0 8px", backgroundBlendMode: "overlay",
         }}>FEATURED</span>
       )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1017,6 +1098,7 @@ function ProjectCard({ project }: { project: typeof PROJECTS[number] }) {
           width: 24, height: 24, borderRadius: 6, display: "inline-flex",
           alignItems: "center", justifyContent: "center", fontSize: 14,
           background: `${catColor}15`, border: `1px solid ${catColor}40`,
+          transition: "transform 0.3s cubic-bezier(0.34,1.56,0.64,1)",
         }}>{catIcon}</span>
         {project.live && (
           <span className="font-code" style={{ color: "#00ff88", fontSize: 10, display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -1033,11 +1115,12 @@ function ProjectCard({ project }: { project: typeof PROJECTS[number] }) {
         {project.description}
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {project.tech.map((t) => (
-          <span key={t} className="font-code" style={{
+        {project.tech.map((t, ti) => (
+          <span key={t} className="font-code tech-tag" style={{
             padding: "3px 8px", fontSize: 10, borderRadius: 6,
             border: "1px solid rgba(0,245,255,0.25)", color: "#9beaff",
-          }}>{t}</span>
+            "--i": ti,
+          } as CSSProperties & { "--i": number }}>{t}</span>
         ))}
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
@@ -1045,14 +1128,14 @@ function ProjectCard({ project }: { project: typeof PROJECTS[number] }) {
           height: 34, padding: "0 14px", borderRadius: 8,
           border: "1px solid rgba(255,255,255,0.15)", color: "#e2e8f0",
           display: "inline-flex", alignItems: "center", fontSize: 12,
-          textDecoration: "none",
+          textDecoration: "none", transition: "border-color 0.25s, color 0.25s, transform 0.25s",
         }}>{"< Code />"}</a>
         {project.live && (
           <a href={project.live} target="_blank" rel="noreferrer" className="font-code" style={{
             height: 34, padding: "0 14px", borderRadius: 8,
             border: "1px solid rgba(0,245,255,0.4)", color: "#00f5ff",
             display: "inline-flex", alignItems: "center", fontSize: 12,
-            textDecoration: "none",
+            textDecoration: "none", transition: "border-color 0.25s, color 0.25s, transform 0.25s",
           }}>[ Live ↗ ]</a>
         )}
       </div>
