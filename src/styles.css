@@ -229,6 +229,61 @@
   animation: reveal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+/* Project card stagger-in */
+@keyframes card-in {
+  0% { opacity: 0; transform: translateY(36px) scale(0.94); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.project-card-reveal {
+  opacity: 0;
+}
+.project-card-reveal.in {
+  animation: card-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Tech tag hover wave */
+.tech-tag {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s, color 0.25s, background 0.25s;
+  transition-delay: calc(var(--i, 0) * 35ms);
+}
+.glass:hover .tech-tag {
+  transform: translateY(-3px);
+  border-color: rgba(0, 245, 255, 0.6);
+  color: #ffffff;
+  background: rgba(0, 245, 255, 0.08);
+}
+
+/* Featured badge shimmer */
+@keyframes badge-shimmer {
+  0% { background-position: -60px 0; }
+  100% { background-position: 160px 0; }
+}
+.badge-shimmer {
+  background-image: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+  background-size: 60px 100%;
+  background-repeat: no-repeat;
+  animation: badge-shimmer 2.4s ease-in-out infinite;
+}
+
+/* Mobile swipe hint */
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(10px); opacity: 1; }
+}
+.swipe-hint {
+  animation: swipe-hint 1.3s ease-in-out infinite;
+}
+
+/* Filter fade-swap */
+@keyframes filter-swap {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.filter-swap {
+  animation: filter-swap 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
 @media (pointer: coarse) {
   .cursor-dot, .cursor-ring { display: none !important; }
 }
