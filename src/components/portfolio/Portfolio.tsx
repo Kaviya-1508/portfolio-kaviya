@@ -1146,7 +1146,7 @@ function ProjectCard({ project, index = 0 }: { project: typeof PROJECTS[number];
 /* ====================================================================== */
 /* RESUME                                                                  */
 /* ====================================================================== */
-const RESUME_URL = "https://drive.google.com/file/d/1CKaCLH46O9YWX6qK4zcttmZKdIbW21fW/view?usp=drivesdk";
+const RESUME_URL = "https://drive.google.com/file/d/1w69oTYtaqaZGofMS8VmmQpt6Ou6CBORS/view?usp=sharing";
 function Resume() {
   const ref = useReveal<HTMLDivElement>();
   return (
