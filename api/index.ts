@@ -1,4 +1,4 @@
-export const config = { runtime: "edge" };
+export const config = { runtime: "nodejs" };
 import server from "../dist/server/server.js";
 
 export default async function handler(request: Request): Promise<Response> {
